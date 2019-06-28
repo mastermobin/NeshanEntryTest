@@ -3,4 +3,16 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <color name="colorGas">#008000</color>
+    <color name="colorCNG">#C56309</color>
+    <color name="colorWC">#56617C</color>
+    <color name="colorEmergency">#FD7979</color>
+    <color name="colorParking">#0072B1</color>
+    <color name="colorMosque">#00A44A</color>
+    <color name="colorRestaurant">#FD8F52</color>
+    <color name="colorATM">#5D5390</color>
+    <color name="colorFastFood">#FD8F52</color>
+    <color name="colorStore">#B258FE</color>
+    <color name="colorPharmacy">#C33DA0</color>
 </resources>
