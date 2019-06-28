@@ -43,6 +43,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private LngLat placeA, placeB;
     private int speed = 30;
 
+    private boolean isOnSearch = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,12 +126,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tvSerach.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showFragment();
+                if(!isOnSearch) showFragment();
             }
         });
     }
 
     void showFragment() {
+        isOnSearch = true;
         SearchFragment searchFragment = SearchFragment.newInstance(map.getFocalPointPosition(), this);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -153,8 +156,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             markerAnimation.kill();
             markerAnimation.cancel(true);
         }
-        map.setFocalPointPosition(pos, 1f);
-        map.setZoom(14f, 1);
+        map.setFocalPointPosition(pos, 0);
+        map.setZoom(16f, 1);
         marker = DrawUtils.drawMarker(pos, markerLayer, BitmapFactory.decodeResource(getResources(), R.drawable.ic_marker));
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        isOnSearch = false;
     }
 }

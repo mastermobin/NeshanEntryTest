@@ -29,7 +29,7 @@ import ir.mobin.test.model.Result;
 import ir.mobin.test.model.Shortcut;
 import ir.mobin.test.R;
 
-public class SearchFragment extends Fragment {
+public class SearchFragment extends Fragment implements ShortcutAdapter.ShortcutListener {
 
     private EditText etSearch;
     private RecyclerView rvShortcut, rvResult, rvRecent;
@@ -94,7 +94,7 @@ public class SearchFragment extends Fragment {
         rvShortcut.setHasFixedSize(true);
         rvShortcut.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         rvShortcut.setLayoutManager(layoutManager);
-        ShortcutAdapter shortcutAdapter = new ShortcutAdapter(data, getContext());
+        ShortcutAdapter shortcutAdapter = new ShortcutAdapter(data, getContext(), this);
         rvShortcut.setAdapter(shortcutAdapter);
 
         etSearch.addTextChangedListener(new TextWatcher() {
@@ -152,6 +152,11 @@ public class SearchFragment extends Fragment {
                 Log.d("NESHANTEST", throwable.getMessage());
             }
         });
+    }
+
+    @Override
+    public void onShortcutClick(String title) {
+        etSearch.setText(title);
     }
 
     public interface SearchListener{

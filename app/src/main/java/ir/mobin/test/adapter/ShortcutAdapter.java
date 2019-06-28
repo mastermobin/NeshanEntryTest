@@ -30,10 +30,12 @@ public class ShortcutAdapter extends RecyclerView.Adapter<ShortcutAdapter.ViewHo
     private List<Shortcut> data;
     private Context context;
     private int size = 4;
+    private ShortcutListener shortcutListener;
 
-    public ShortcutAdapter(List<Shortcut> data, Context context) {
+    public ShortcutAdapter(List<Shortcut> data, Context context, ShortcutListener shortcutListener) {
         this.data = data;
         this.context = context;
+        this.shortcutListener = shortcutListener;
     }
 
     @NonNull
@@ -110,7 +112,7 @@ public class ShortcutAdapter extends RecyclerView.Adapter<ShortcutAdapter.ViewHo
                 @Override
                 public void onClick(View view) {
                     if (clickBehave == 0) {
-
+                        shortcutListener.onShortcutClick(data.get(getAdapterPosition()).getType());
                     } else if (clickBehave == 1) {
                         size = 12;
                         notifyDataSetChanged();
@@ -136,5 +138,9 @@ public class ShortcutAdapter extends RecyclerView.Adapter<ShortcutAdapter.ViewHo
             else
                 ivType.setPadding(0, 0, 0, 0);
         }
+    }
+
+    public interface ShortcutListener{
+        void onShortcutClick(String title);
     }
 }
