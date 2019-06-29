@@ -108,7 +108,7 @@ public class ShortcutAdapter extends RecyclerView.Adapter<ShortcutAdapter.ViewHo
 
             padding = ivType.getPaddingRight();
 
-            ivType.setOnClickListener(new View.OnClickListener() {
+            itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if (clickBehave == 0) {

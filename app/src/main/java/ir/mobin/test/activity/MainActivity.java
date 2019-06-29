@@ -158,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         map.setFocalPointPosition(pos, 0);
         map.setZoom(16f, 1);
+        lineLayer.clear();
         marker = DrawUtils.drawMarker(pos, markerLayer, BitmapFactory.decodeResource(getResources(), R.drawable.ic_marker));
     }
 

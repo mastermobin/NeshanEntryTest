@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import org.neshan.core.LngLat;
 
@@ -33,6 +34,7 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
 
     private EditText etSearch;
     private RecyclerView rvShortcut, rvResult, rvRecent;
+    private ImageView ivBack;
 
     private WebServiceHelper webServiceHelper;
 
@@ -63,12 +65,13 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_search,container, false);
+        View view = inflater.inflate(R.layout.fragment_search, container, false);
 
         rvShortcut = view.findViewById(R.id.rvShortcut);
         rvRecent = view.findViewById(R.id.rvRecent);
         rvResult = view.findViewById(R.id.rvResult);
         etSearch = view.findViewById(R.id.etSearch);
+        ivBack = view.findViewById(R.id.ivBack);
 
         webServiceHelper = WebServiceHelper.getInstance();
         searchAdapter = new SearchAdapter();
@@ -89,7 +92,7 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
         data.add(new Shortcut("مرکز خرید", R.drawable.ic_store, R.color.colorStore));
         data.add(new Shortcut("داروخانه", R.drawable.ic_pharmacy, R.color.colorPharmacy));
 
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 4, LinearLayoutManager.VERTICAL,false);
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 4, LinearLayoutManager.VERTICAL, false);
         rvShortcut.setVerticalScrollBarEnabled(false);
         rvShortcut.setHasFixedSize(true);
         rvShortcut.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
@@ -115,16 +118,31 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
                 new Timer().schedule(new TimerTask() {
                     @Override
                     public void run() {
-                        if(counter == co){
+                        if (counter == co) {
                             search();
                         }
                     }
                 }, 1500);
 
-                if(editable.toString().length() == 0){
+                if (editable.toString().length() == 0) {
                     rvResult.setVisibility(View.GONE);
-                }else{
+                    ivBack.setImageResource(R.drawable.ic_back_circle);
+                    searchAdapter.clear();
+                } else {
                     rvResult.setVisibility(View.VISIBLE);
+                    ivBack.setImageResource(R.drawable.ic_clear_circle);
+
+                }
+            }
+        });
+
+        ivBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (rvResult.getVisibility() == View.VISIBLE) {
+                    etSearch.setText("");
+                } else {
+                    getActivity().onBackPressed();
                 }
             }
         });
@@ -132,11 +150,11 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
         return view;
     }
 
-    private void search(){
+    private void search() {
         webServiceHelper.search(etSearch.getText().toString(), focus, new WebServiceHelper.SearchListener() {
             @Override
             public void onSearchResult(List<Result> results) {
-                for(int i = 0; i < results.size(); i++){
+                for (int i = 0; i < results.size(); i++) {
                     Log.d("NESHANTEST", results.get(i).getTitle());
                 }
                 searchAdapter.setData(results, focus, new SearchAdapter.ItemClickListener() {
@@ -155,11 +173,24 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
     }
 
     @Override
-    public void onShortcutClick(String title) {
-        etSearch.setText(title);
+    public void onShortcutClick(final String title) {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (etSearch.getText().toString().isEmpty()) {
+                            etSearch.setText(title);
+                            etSearch.setSelection(etSearch.getText().length());
+                        }
+                    }
+                });
+            }
+        }, 500);
     }
 
-    public interface SearchListener{
+    public interface SearchListener {
         void onSelect(String title, LngLat pos);
     }
 }

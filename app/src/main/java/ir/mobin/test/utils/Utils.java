@@ -37,4 +37,38 @@ public class Utils {
         m.appendTail(sb);
         return sb.toString();
     }
+
+    public static String translateTypes(String type){
+        switch (type) {
+            case "restaurant":
+                return "رستوران";
+            case "gas_station":
+                return "مرکز سوخت";
+            case "wc":
+                return "سرویس بهداشتی";
+            case "road_helal_ahmar":
+                return "پایگاه امداد";
+            case "parking":
+                return "پارکینگ";
+            case "mosque":
+                return "مسجد";
+            case "atm":
+                return "خودپرداز";
+            case "fast_food":
+                return "فست‌فود";
+            case "shopping_mall":
+                return "مرکز خرید";
+            case "pharmacy":
+                return "داروخانه";
+            case "cafe":
+                return "کافی‌شاپ";
+            case "hospital":
+                return "رستوران";
+            case "car_wash":
+                return "کارواش";
+            case "hotel":
+                return "هتل";
+        }
+        return "متفرقه";
+    }
 }
