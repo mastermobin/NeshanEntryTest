@@ -7,7 +7,7 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
-import ir.mobin.test.converter.DataConverter;
+import ir.mobin.test.utils.DataConverter;
 import ir.mobin.test.dao.RecentSearchDao;
 import ir.mobin.test.model.RecentSearch;
 

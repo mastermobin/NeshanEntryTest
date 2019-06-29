@@ -30,6 +30,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:backgroundTint="@color/normal"
                     android:fontFamily="@font/iransans"
                     android:text="مقصد" />
 
@@ -38,6 +39,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:backgroundTint="@color/normal"
                     android:fontFamily="@font/iransans"
                     android:text="مبدا" />
 

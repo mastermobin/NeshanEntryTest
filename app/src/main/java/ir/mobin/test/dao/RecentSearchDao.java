@@ -12,9 +12,9 @@ import ir.mobin.test.model.RecentSearch;
 public interface RecentSearchDao {
 
     @Insert
-    public void insert(RecentSearch recentSearch);
+    void insert(RecentSearch recentSearch);
 
     @Query("SELECT * FROM recent_search ORDER BY date DESC")
-    public List<RecentSearch> getRecents();
+    List<RecentSearch> getRecent();
 
 }

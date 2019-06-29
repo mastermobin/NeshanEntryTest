@@ -1,4 +1,4 @@
-package ir.mobin.test.converter;
+package ir.mobin.test.utils;
 
 import androidx.room.TypeConverter;
 

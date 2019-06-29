@@ -68,14 +68,14 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.Se
                     showFragment(SearchFragment.newInstance(map.getFocalPointPosition(), MainActivity.this, new SearchFragment.SearchActions() {
                         @Override
                         public void onSimulate() {
-                            showFragment(SimulationFragment.newInstance(lineLayer, markerLayer), R.id.topContainer);
+                            showFragment(SimulationFragment.newInstance(lineLayer, markerLayer), R.id.container, 1);
                         }
-                    }), R.id.container);
+                    }), R.id.container, 0);
             }
         });
     }
 
-    void showFragment(Fragment fragment, int layout) {
+    void showFragment(Fragment fragment, int layout, int anim) {
         if (onFrag)
             onBackPressed();
         lastFrag = fragment;
@@ -83,7 +83,11 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.Se
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.setCustomAnimations(R.anim.exit_anim, R.anim.enter_anim, R.anim.exit_anim, R.anim.enter_anim);
+        if(anim == 0)
+            fragmentTransaction.setCustomAnimations(R.anim.slide_in_down, R.anim.slide_out_down, R.anim.slide_in_down, R.anim.slide_out_down);
+        else
+            fragmentTransaction.setCustomAnimations(R.anim.slide_in_up, R.anim.slide_out_up, R.anim.slide_in_up, R.anim.slide_out_up);
+
         fragmentTransaction.add(layout, fragment).commit();
     }
 
@@ -99,6 +103,9 @@ public class MainActivity extends AppCompatActivity implements SearchFragment.Se
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+//        if(lastFrag != null){
+//            lastFrag.des
+//        }
         onFrag = false;
         lastFrag = null;
     }

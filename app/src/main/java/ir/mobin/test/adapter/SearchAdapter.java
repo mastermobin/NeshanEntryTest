@@ -26,25 +26,6 @@ import ir.mobin.test.utils.Utils;
 
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder> {
 
-    private static final Map<String, Integer> IMAGE_DRAWABLES = new HashMap<>();
-    static {
-        IMAGE_DRAWABLES.put("restaurant", R.drawable.ic_restaurant);
-        IMAGE_DRAWABLES.put("gas_station", R.drawable.ic_gas_station);
-        IMAGE_DRAWABLES.put("wc", R.drawable.ic_wc);
-        IMAGE_DRAWABLES.put("road_helal_ahmar", R.drawable.ic_helal_ahmar);
-        IMAGE_DRAWABLES.put("parking", R.drawable.ic_parking);
-        IMAGE_DRAWABLES.put("mosque", R.drawable.ic_mosque);
-        IMAGE_DRAWABLES.put("atm", R.drawable.ic_atm);
-        IMAGE_DRAWABLES.put("fast_food", R.drawable.ic_fastfood);
-        IMAGE_DRAWABLES.put("shopping_mall", R.drawable.ic_store);
-        IMAGE_DRAWABLES.put("pharmacy", R.drawable.ic_pharmacy);
-        IMAGE_DRAWABLES.put("cafe", R.drawable.ic_cafe);
-        IMAGE_DRAWABLES.put("hospital", R.drawable.ic_hospital);
-        IMAGE_DRAWABLES.put("car_wash", R.drawable.ic_car_wash);
-        IMAGE_DRAWABLES.put("hotel", R.drawable.ic_hotel);
-        IMAGE_DRAWABLES.put("misc", R.drawable.ic_misc);
-    }
-
     private List<Result> data = new ArrayList<>();
     private LngLat focal;
     private PlaceListener placeListener;
@@ -68,9 +49,8 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
         viewHolder.tvTitle.setText(res.getTitle());
         viewHolder.tvType.setText(Utils.translateTypes(res.getType()));
         viewHolder.tvAddress.setText(res.getAddress());
-        if(IMAGE_DRAWABLES.containsKey(res.getType())) {
-            viewHolder.ivType.setImageResource(IMAGE_DRAWABLES.get(res.getType()));
-        }
+        viewHolder.ivType.setImageResource(Utils.getTypeRes(res.getType()));
+
         String dist = String.valueOf(new DecimalFormat("#.#").format(GeoUtils.distance(focal, new LngLat(res.getLocation().getX(), res.getLocation().getY()), 0, 0)));
         viewHolder.tvDistance.setText(Utils.persianDigits(dist) + "\n" + "کیلومتر");
     }
@@ -80,7 +60,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
         return data.size();
     }
 
-    public void clear(){
+    public void clear() {
         data.clear();
     }
 

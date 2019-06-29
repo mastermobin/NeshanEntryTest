@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import org.neshan.core.LngLat;
@@ -42,6 +43,8 @@ public class SimulationFragment extends Fragment implements MapListener, View.On
     private LngLat placeA, placeB;
     private int speed = 30;
 
+    private int colorA = R.color.normal, colorB = R.color.normal;
+
     public static SimulationFragment newInstance(VectorElementLayer lineLayer, VectorElementLayer markerLayer) {
 
         Bundle args = new Bundle();
@@ -52,7 +55,7 @@ public class SimulationFragment extends Fragment implements MapListener, View.On
         return fragment;
     }
 
-    public void setLayers(VectorElementLayer lineLayer, VectorElementLayer markerLayer){
+    public void setLayers(VectorElementLayer lineLayer, VectorElementLayer markerLayer) {
         this.lineLayer = lineLayer;
         this.markerLayer = markerLayer;
     }
@@ -95,12 +98,21 @@ public class SimulationFragment extends Fragment implements MapListener, View.On
 
     @Override
     public void onMapClicked(ClickData clickData) {
-        Log.d("NESHANTEST", "HERE");
         if (selectionNumber == 0) {
+            colorA = R.color.accept;
             placeA = clickData.getClickPos();
         } else if (selectionNumber == 1) {
+            colorB = R.color.accept;
             placeB = clickData.getClickPos();
         }
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                btnPlaceA.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), colorA));
+                btnPlaceB.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), colorB));
+            }
+        });
 
         selectionNumber = -1;
         if (placeA != null && placeB != null)
@@ -126,11 +138,20 @@ public class SimulationFragment extends Fragment implements MapListener, View.On
     }
 
     @Override
-    public void onClick(View view) {
+    public void onClick(final View view) {
         if (view.getId() == R.id.btnPlaceA)
             selectionNumber = 0;
         else if (view.getId() == R.id.btnPlaceB)
             selectionNumber = 1;
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                btnPlaceA.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), colorA));
+                btnPlaceB.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), colorB));
+                view.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), R.color.wait));
+            }
+        });
     }
 
     @Override

@@ -233,7 +233,7 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
     {
         @Override
         protected List<RecentSearch> doInBackground(Void... voids) {
-            return searchDatabase.recentSearchDao().getRecents();
+            return searchDatabase.recentSearchDao().getRecent();
         }
 
         @Override

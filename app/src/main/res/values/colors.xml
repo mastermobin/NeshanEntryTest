@@ -15,4 +15,8 @@
     <color name="colorFastFood">#FD8F52</color>
     <color name="colorStore">#B258FE</color>
     <color name="colorPharmacy">#C33DA0</color>
+
+    <color name="accept">#4CAF50</color>
+    <color name="wait">#CDDC39</color>
+    <color name="normal">#00FFFFFF</color>
 </resources>
