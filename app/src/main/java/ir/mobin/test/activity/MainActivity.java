@@ -2,49 +2,37 @@ package ir.mobin.test.activity;
 
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import org.neshan.core.LngLat;
-import org.neshan.core.LngLatVector;
 import org.neshan.layers.VectorElementLayer;
 import org.neshan.services.NeshanMapStyle;
 import org.neshan.services.NeshanServices;
 import org.neshan.ui.ClickData;
 import org.neshan.ui.MapEventListener;
 import org.neshan.ui.MapView;
-import org.neshan.vectorelements.Marker;
 
 import ir.mobin.test.R;
 import ir.mobin.test.fragment.SearchFragment;
+import ir.mobin.test.fragment.SimulationFragment;
+import ir.mobin.test.interfaces.MapListener;
 import ir.mobin.test.utils.DrawUtils;
-import ir.mobin.test.utils.MarkerAnimation;
-import ir.mobin.test.helper.WebServiceHelper;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, SearchFragment.SearchListener {
+public class MainActivity extends AppCompatActivity implements SearchFragment.SearchListener {
 
     private MapView map;
-    private Button btnPlaceA, btnPlaceB;
-    private TextView tvSpeed, tvSerach;
-    private SeekBar sbSpeed;
+    private TextView tvSerach;
 
-    private WebServiceHelper webServiceHelper;
-    private Marker marker;
     private VectorElementLayer lineLayer, markerLayer;
-    private MarkerAnimation markerAnimation;
+    private Fragment lastFrag;
 
-    private int selectionNumber = -1;
-    private LngLat placeA, placeB;
-    private int speed = 30;
-
-    private boolean isOnSearch = false;
+    private boolean onFrag = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +40,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         map = findViewById(R.id.map);
-        btnPlaceA = findViewById(R.id.btnPlaceA);
-        btnPlaceB = findViewById(R.id.btnPlaceB);
-        sbSpeed = findViewById(R.id.sbSpeed);
-        tvSpeed = findViewById(R.id.tvSpeed);
         tvSerach = findViewById(R.id.tvSearch);
-
-        webServiceHelper = WebServiceHelper.getInstance();
 
         lineLayer = NeshanServices.createVectorElementLayer();
         markerLayer = NeshanServices.createVectorElementLayer();
@@ -70,108 +52,54 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         map.getLayers().add(lineLayer);
         map.getLayers().add(markerLayer);
 
-        sbSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                speed = i;
-                tvSpeed.setText("Speed: " + speed + "km");
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
         map.setMapEventListener(new MapEventListener() {
             @Override
             public void onMapClicked(ClickData mapClickInfo) {
-                if (selectionNumber == 0) {
-                    placeA = mapClickInfo.getClickPos();
-                } else if (selectionNumber == 1) {
-                    placeB = mapClickInfo.getClickPos();
+                if (lastFrag != null && lastFrag instanceof MapListener) {
+                    ((MapListener) lastFrag).onMapClicked(mapClickInfo);
                 }
-
-                selectionNumber = -1;
-                if (placeA != null && placeB != null)
-                    webServiceHelper.getRoute(new WebServiceHelper.RouteListener() {
-                        @Override
-                        public void onRouteFound(LngLatVector path) {
-                            if (markerAnimation != null) {
-                                markerAnimation.kill();
-                                markerAnimation.cancel(true);
-                            }
-                            DrawUtils.drawLine(path, lineLayer);
-                            marker = DrawUtils.drawMarker(new LngLat(path.get(0).getX(), path.get(0).getY()), markerLayer, BitmapFactory.decodeResource(getResources(), R.drawable.ic_marker));
-
-                            markerAnimation = new MarkerAnimation(marker, speed);
-                            markerAnimation.execute(path);
-                        }
-
-                        @Override
-                        public void onRoutingFailed(Throwable throwable) {
-                            Log.d("NESHANTEST", throwable.getMessage());
-                        }
-                    }, placeA, placeB);
             }
         });
-
-        btnPlaceA.setOnClickListener(this);
-        btnPlaceB.setOnClickListener(this);
 
         tvSerach.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!isOnSearch) showFragment();
+                if (lastFrag == null || !(lastFrag instanceof SearchFragment))
+                    showFragment(SearchFragment.newInstance(map.getFocalPointPosition(), MainActivity.this, new SearchFragment.SearchActions() {
+                        @Override
+                        public void onSimulate() {
+                            showFragment(SimulationFragment.newInstance(lineLayer, markerLayer), R.id.topContainer);
+                        }
+                    }), R.id.container);
             }
         });
     }
 
-    void showFragment() {
-        if (markerAnimation != null) {
-            markerAnimation.kill();
-            markerAnimation.cancel(true);
-            lineLayer.clear();
-            markerLayer.clear();
-        }
-        isOnSearch = true;
-        SearchFragment searchFragment = SearchFragment.newInstance(map.getFocalPointPosition(), this);
+    void showFragment(Fragment fragment, int layout) {
+        if (onFrag)
+            onBackPressed();
+        lastFrag = fragment;
+        onFrag = true;
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.setCustomAnimations(R.anim.exit_anim, R.anim.enter_anim, R.anim.exit_anim, R.anim.enter_anim);
-        fragmentTransaction.add(R.id.container, searchFragment).commit();
-    }
-
-    @Override
-    public void onClick(View view) {
-        if (view.getId() == R.id.btnPlaceA)
-            selectionNumber = 0;
-        else if (view.getId() == R.id.btnPlaceB)
-            selectionNumber = 1;
+        fragmentTransaction.add(layout, fragment).commit();
     }
 
     @Override
     public void onSelect(String title, LngLat pos) {
         onBackPressed();
-        if (markerAnimation != null) {
-            markerAnimation.kill();
-            markerAnimation.cancel(true);
-        }
         map.setFocalPointPosition(pos, 0);
         map.setZoom(16f, 1);
         lineLayer.clear();
-        marker = DrawUtils.drawMarker(pos, markerLayer, BitmapFactory.decodeResource(getResources(), R.drawable.ic_marker));
+        DrawUtils.drawMarker(pos, markerLayer, BitmapFactory.decodeResource(getResources(), R.drawable.ic_marker));
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        isOnSearch = false;
+        onFrag = false;
+        lastFrag = null;
     }
 }

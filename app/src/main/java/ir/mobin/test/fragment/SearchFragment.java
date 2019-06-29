@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,9 +41,11 @@ import ir.mobin.test.R;
 public class SearchFragment extends Fragment implements ShortcutAdapter.ShortcutListener, TextWatcher, SearchAdapter.PlaceListener {
 
     private EditText etSearch;
+    private TextView tvSimulate;
     private RecyclerView rvShortcut, rvResult, rvRecent;
     private ImageView ivBack;
     private SearchDatabase searchDatabase;
+    private SearchActions searchActions;
 
     private WebServiceHelper webServiceHelper;
 
@@ -52,15 +55,20 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
     private SearchAdapter searchAdapter;
     private RecentSearchAdapter recentSearchAdapter;
 
-    public static SearchFragment newInstance(LngLat pos, SearchListener searchListener) {
+    public static SearchFragment newInstance(LngLat pos, SearchListener searchListener, SearchActions searchActions) {
 
         Bundle args = new Bundle();
 
         SearchFragment fragment = new SearchFragment();
         fragment.setArguments(args);
         fragment.setFocus(pos);
+        fragment.setSearchActions(searchActions);
         fragment.setSearchListener(searchListener);
         return fragment;
+    }
+
+    public void setSearchActions(SearchActions searchActions) {
+        this.searchActions = searchActions;
     }
 
     public void setSearchListener(SearchListener searchListener) {
@@ -81,6 +89,7 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
         rvResult = view.findViewById(R.id.rvResult);
         etSearch = view.findViewById(R.id.etSearch);
         ivBack = view.findViewById(R.id.ivBack);
+        tvSimulate = view.findViewById(R.id.tvSimulate);
 
         webServiceHelper = WebServiceHelper.getInstance();
         searchDatabase = SearchDatabase.getInstance(getContext());
@@ -126,6 +135,13 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
                 } else {
                     getActivity().onBackPressed();
                 }
+            }
+        });
+
+        tvSimulate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                searchActions.onSimulate();
             }
         });
 
@@ -234,5 +250,9 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
             searchDatabase.recentSearchDao().insert(recentSearches[0]);
             return null;
         }
+    }
+
+    public interface SearchActions{
+        void onSimulate();
     }
 }

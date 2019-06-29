@@ -66,6 +66,7 @@
 
             <EditText
                 android:id="@+id/etSearch"
+                android:lines="1"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:background="#0000"
@@ -88,12 +89,12 @@
         android:id="@+id/rvShortcut"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:background="#fff"
         android:overScrollMode="never"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/tvSimulate" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvRecent"
@@ -103,5 +104,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/rvShortcut" />
+
+    <TextView
+        android:id="@+id/tvSimulate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/text_view_background"
+        android:fontFamily="@font/iransans"
+        android:gravity="center"
+        android:text="شبیه‌سازی حرکت"
+        app:layout_constraintEnd_toEndOf="@+id/rvShortcut"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

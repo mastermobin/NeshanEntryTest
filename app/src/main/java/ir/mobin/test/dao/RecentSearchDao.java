@@ -14,7 +14,7 @@ public interface RecentSearchDao {
     @Insert
     public void insert(RecentSearch recentSearch);
 
-    @Query("SELECT * FROM recent_search")
+    @Query("SELECT * FROM recent_search ORDER BY date DESC")
     public List<RecentSearch> getRecents();
 
 }
