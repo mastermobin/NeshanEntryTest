@@ -15,11 +15,11 @@ import ir.mobin.test.model.RecentSearch;
 @TypeConverters(DataConverter.class)
 public abstract class SearchDatabase extends RoomDatabase {
 
-    abstract RecentSearchDao recentSearchDao();
+    public abstract RecentSearchDao recentSearchDao();
 
     private static SearchDatabase i;
 
-    synchronized SearchDatabase getInstance(Context context){
+    public static synchronized SearchDatabase getInstance(Context context){
         if(i == null){
             i = Room.databaseBuilder(context, SearchDatabase.class, "search_database")
                     .fallbackToDestructiveMigration().build();

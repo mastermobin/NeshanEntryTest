@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ir.mobin.test.model.Place;
 import ir.mobin.test.model.Result;
 import ir.mobin.test.R;
 import ir.mobin.test.utils.GeoUtils;
@@ -46,12 +47,12 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
 
     private List<Result> data = new ArrayList<>();
     private LngLat focal;
-    private ItemClickListener itemClickListener;
+    private PlaceListener placeListener;
 
-    public void setData(List<Result> data, LngLat focal, ItemClickListener itemClickListener) {
+    public void setData(List<Result> data, LngLat focal, PlaceListener placeListener) {
         this.data = data;
         this.focal = focal;
-        this.itemClickListener = itemClickListener;
+        this.placeListener = placeListener;
         notifyDataSetChanged();
     }
 
@@ -106,13 +107,14 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    itemClickListener.onItemClick(data.get(getAdapterPosition()));
+                    Result res = data.get(getAdapterPosition());
+                    placeListener.onPlaceSelection(new Place(res.getTitle(), res.getAddress(), new LngLat(res.getLocation().getX(), res.getLocation().getY())));
                 }
             });
         }
     }
 
-    public interface ItemClickListener{
-        void onItemClick(Result result);
+    public interface PlaceListener {
+        void onPlaceSelection(Place result);
     }
 }

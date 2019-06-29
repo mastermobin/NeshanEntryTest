@@ -1,5 +1,6 @@
 package ir.mobin.test.fragment;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -20,22 +21,28 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.neshan.core.LngLat;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import ir.mobin.test.adapter.RecentSearchAdapter;
 import ir.mobin.test.adapter.SearchAdapter;
 import ir.mobin.test.adapter.ShortcutAdapter;
+import ir.mobin.test.helper.SearchDatabase;
 import ir.mobin.test.helper.WebServiceHelper;
+import ir.mobin.test.model.Place;
+import ir.mobin.test.model.RecentSearch;
 import ir.mobin.test.model.Result;
 import ir.mobin.test.model.Shortcut;
 import ir.mobin.test.R;
 
-public class SearchFragment extends Fragment implements ShortcutAdapter.ShortcutListener {
+public class SearchFragment extends Fragment implements ShortcutAdapter.ShortcutListener, TextWatcher, SearchAdapter.PlaceListener {
 
     private EditText etSearch;
     private RecyclerView rvShortcut, rvResult, rvRecent;
     private ImageView ivBack;
+    private SearchDatabase searchDatabase;
 
     private WebServiceHelper webServiceHelper;
 
@@ -43,6 +50,7 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
     private LngLat focus;
     private SearchListener searchListener;
     private SearchAdapter searchAdapter;
+    private RecentSearchAdapter recentSearchAdapter;
 
     public static SearchFragment newInstance(LngLat pos, SearchListener searchListener) {
 
@@ -75,8 +83,15 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
         ivBack = view.findViewById(R.id.ivBack);
 
         webServiceHelper = WebServiceHelper.getInstance();
+        searchDatabase = SearchDatabase.getInstance(getContext());
+        recentSearchAdapter = new RecentSearchAdapter(this);
+        rvRecent.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
+        rvRecent.setAdapter(recentSearchAdapter);
+
+        new GetRecentSearches().execute((Void) null);
+
         searchAdapter = new SearchAdapter();
-        RecyclerView.LayoutManager resultLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        RecyclerView.LayoutManager resultLayoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
         rvResult.setLayoutManager(resultLayoutManager);
         rvResult.setAdapter(searchAdapter);
 
@@ -93,7 +108,7 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
         data.add(new Shortcut("مرکز خرید", R.drawable.ic_store, R.color.colorStore));
         data.add(new Shortcut("داروخانه", R.drawable.ic_pharmacy, R.color.colorPharmacy));
 
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 4, LinearLayoutManager.VERTICAL, false);
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 4, RecyclerView.VERTICAL, false);
         rvShortcut.setVerticalScrollBarEnabled(false);
         rvShortcut.setHasFixedSize(true);
         rvShortcut.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
@@ -101,41 +116,7 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
         ShortcutAdapter shortcutAdapter = new ShortcutAdapter(data, getContext(), this);
         rvShortcut.setAdapter(shortcutAdapter);
 
-        etSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(final Editable editable) {
-                counter++;
-                final long co = counter;
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        if (counter == co) {
-                            search();
-                        }
-                    }
-                }, 1500);
-
-                if (editable.toString().length() == 0) {
-                    rvResult.setVisibility(View.GONE);
-                    ivBack.setImageResource(R.drawable.ic_back_circle);
-                    searchAdapter.clear();
-                } else {
-                    rvResult.setVisibility(View.VISIBLE);
-                    ivBack.setImageResource(R.drawable.ic_clear_circle);
-
-                }
-            }
-        });
+        etSearch.addTextChangedListener(this);
 
         ivBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -155,13 +136,11 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
         webServiceHelper.search(etSearch.getText().toString(), focus, new WebServiceHelper.SearchListener() {
             @Override
             public void onSearchResult(List<Result> results) {
-                for (int i = 0; i < results.size(); i++) {
-                    Log.d("NESHANTEST", results.get(i).getTitle());
-                }
-                searchAdapter.setData(results, focus, new SearchAdapter.ItemClickListener() {
+                searchAdapter.setData(results, focus, new SearchAdapter.PlaceListener() {
                     @Override
-                    public void onItemClick(Result result) {
-                        searchListener.onSelect(result.getTitle(), new LngLat(result.getLocation().getX(), result.getLocation().getY()));
+                    public void onPlaceSelection(Place place) {
+                        new InsertRecentSearches().execute(new RecentSearch(place.getTitle(), place.getAddress(), place.getLocation(), new Date()));
+                        searchListener.onSelect(place.getTitle(), place.getLocation());
                     }
                 });
             }
@@ -191,7 +170,69 @@ public class SearchFragment extends Fragment implements ShortcutAdapter.Shortcut
         }, 500);
     }
 
+    @Override
+    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+    }
+
+    @Override
+    public void afterTextChanged(final Editable editable) {
+        counter++;
+        final long co = counter;
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (counter == co) {
+                    search();
+                }
+            }
+        }, 1500);
+
+        if (editable.toString().length() == 0) {
+            rvResult.setVisibility(View.GONE);
+            ivBack.setImageResource(R.drawable.ic_back_circle);
+            searchAdapter.clear();
+        } else {
+            rvResult.setVisibility(View.VISIBLE);
+            ivBack.setImageResource(R.drawable.ic_clear_circle);
+
+        }
+    }
+
+    @Override
+    public void onPlaceSelection(Place result) {
+        searchListener.onSelect(result.getTitle(), result.getLocation());
+    }
+
     public interface SearchListener {
         void onSelect(String title, LngLat pos);
+    }
+
+    private class GetRecentSearches extends AsyncTask<Void, Void,List<RecentSearch>>
+    {
+        @Override
+        protected List<RecentSearch> doInBackground(Void... voids) {
+            return searchDatabase.recentSearchDao().getRecents();
+        }
+
+        @Override
+        protected void onPostExecute(List<RecentSearch> recentSearches) {
+            super.onPostExecute(recentSearches);
+            recentSearchAdapter.setData(recentSearches);
+        }
+    }
+
+    private class InsertRecentSearches extends AsyncTask<RecentSearch, Void,Void>
+    {
+        @Override
+        protected Void doInBackground(RecentSearch... recentSearches) {
+            searchDatabase.recentSearchDao().insert(recentSearches[0]);
+            return null;
+        }
     }
 }

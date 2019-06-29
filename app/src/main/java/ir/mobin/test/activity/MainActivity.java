@@ -133,6 +133,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     void showFragment() {
+        if (markerAnimation != null) {
+            markerAnimation.kill();
+            markerAnimation.cancel(true);
+            lineLayer.clear();
+            markerLayer.clear();
+        }
         isOnSearch = true;
         SearchFragment searchFragment = SearchFragment.newInstance(map.getFocalPointPosition(), this);
         FragmentManager fragmentManager = getSupportFragmentManager();
